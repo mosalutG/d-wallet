@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+		<script type="text/javascript" src="js/module/wallet.js"></script>
+		<script type="text/javascript" src="js/demo.js"></script>
+	</head>
+	<body>
+		<aside id="wallet">
+			<menu>
+				<h4>网络设置</h4>
+				<ul>
+					<li>
+						<input type="button" value="以太坊 Ethereum 主网络" onclick="web3.checkout(ethereum);" />
+					</li>
+					<li>
+						<input type="button" value="Ropsten 测试网络" onclick="web3.checkout(ropsten);" />
+					</li>
+					<li>
+						<input type="button" value="Rinkeby 测试网络" onclick="web3.checkout(rinkeby);" />
+					</li>
+					<li>
+						<input type="button" value="Localhost 8545" onclick="web3.checkout(localhost);" />
+					</li>
+					<li>
+						<input type="button" value="BSC 主网络" onclick="web3.checkout(bsc);" />
+					</li>
+					<li>
+						<input type="button" value="BSC 测试网络" onclick="web3.checkout(bscTestNet);" />
+					</li>
+				</ul>
+			</menu>
+			<menu>
+				<h4>账户设置</h4>
+				<ul>
+					<li>
+						<input type="button" value="创建钱包" onclick="web3.createAccount(createCallback);" />
+					</li>
+					<li>
+						<input type="button" value="导入钱包" onclick="importWallet(privKey);" />
+					</li>
+					<li>
+						<input type="button" value="列出钱包" onclick="web3.loadAccounts();" />
+					</li>
+					<li>
+						<input type="button" value="备份钱包" onclick="web3.backupWallet();" />
+					</li>
+				</ul>
+			</menu>
+		</aside>
+	</body>
+</html>

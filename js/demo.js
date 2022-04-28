@@ -1,4 +1,5 @@
-console.log(web3);
+// localStorage.removeItem("accounts");
+
 web3.eth.getChainId().then(console.log);
 
 function createCallback(account) {
