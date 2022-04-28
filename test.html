@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+		<script type="text/javascript" src="js/module/wallet.js"></script>
+		<script type="text/javascript" src="js/test.js"></script>
+	</head>
+	<body>
+		<aside id="wallet">
+			<menu>
+				<h4>网络设置</h4>
+				<ul>
+					<li>
+						<input type="button" value="以太坊 Ethereum 主网络" onclick="checkout(ethereum);" />
+					</li>
+					<li>
+						<input type="button" value="Ropsten 测试网络" onclick="checkout(ropsten);" />
+					</li>
+					<li>
+						<input type="button" value="Rinkeby 测试网络" onclick="checkout(rinkeby);" />
+					</li>
+					<li>
+						<input type="button" value="Localhost 8545" onclick="checkout(localhost);" />
+					</li>
+					<li>
+						<input type="button" value="BSC 主网络" onclick="checkout(bsc);" />
+					</li>
+					<li>
+						<input type="button" value="BSC 测试网络" onclick="checkout(bscTestNet);" />
+					</li>
+				</ul>
+			</menu>
+			<menu>
+				<h4>账户设置</h4>
+				<ul>
+					<li>
+						<input type="button" value="创建钱包" onclick="createWallet(createCallback);" />
+					</li>
+					<li>
+						<input type="button" value="导入钱包" onclick="importWallet(privKey);" />
+					</li>
+				</ul>
+			</menu>
+		</aside>
+	</body>
+</html>
