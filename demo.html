@@ -3,6 +3,7 @@
 <html>
 	<head>
 		<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+		<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/md5@2.3.0/dist/md5.min.js"></script>
 		<script type="text/javascript" src="js/module/wallet.js"></script>
 		<script type="text/javascript" src="js/demo.js"></script>
 	</head>
@@ -12,22 +13,22 @@
 				<h4>网络设置</h4>
 				<ul>
 					<li>
-						<input type="button" value="以太坊 Ethereum 主网络" onclick="dWallet.checkout(ethereum);" />
+						<input class="checkout" data-chain="0" type="button" value="以太坊 Ethereum 主网络" />
 					</li>
 					<li>
-						<input type="button" value="Ropsten 测试网络" onclick="dWallet.checkout(ropsten);" />
+						<input class="checkout" data-chain="1" type="button" value="Ropsten 测试网络" />
 					</li>
 					<li>
-						<input type="button" value="Rinkeby 测试网络" onclick="dWallet.checkout(rinkeby);" />
+						<input class="checkout" data-chain="2" type="button" value="Rinkeby 测试网络" />
 					</li>
 					<li>
-						<input type="button" value="Localhost 8545" onclick="dWallet.checkout(localhost);" />
+						<input class="checkout" data-chain="3" type="button" value="Localhost 8545" />
 					</li>
 					<li>
-						<input type="button" value="BSC 主网络" onclick="dWallet.checkout(bsc);" />
+						<input class="checkout" data-chain="4" type="button" value="BSC 主网络" />
 					</li>
 					<li>
-						<input type="button" value="BSC 测试网络" onclick="dWallet.checkout(bscTestNet);" />
+						<input class="checkout" data-chain="5" type="button" value="BSC 测试网络" />
 					</li>
 				</ul>
 			</menu>
@@ -35,25 +36,34 @@
 				<h4>账户设置</h4>
 				<ul>
 					<li>
-						<input type="button" value="创建账户" onclick="dWallet.createAccount('demo name', logCallback);" />
+						<input id="createAccount" type="button" value="创建账户" />
 					</li>
 					<li>
-						<input type="button" value="导入账户" onclick="dWallet.importAccount('demo name import', '0xc91eec8baa8640f6b93aab08176ea0d87d22df8780e59e623f7602905195a99c', logCallback);" />
+						<input id="importAccount" type="button" value="导入账户" />
 					</li>
 					<li>
-						<input type="button" value="导出账户" onclick="dWallet.exportAccount('0xb169F4368D8acD6294a8779E1f77f87FA9c29d5F', logCallback);" />
+						<input id="exportAccount" type="button" value="导出账户" />
 					</li>
 					<li>
-						<input type="button" value="移除账户" onclick="dWallet.removeAccount(1);" />
+						<input id="removeAccount" type="button" value="移除账户" />
 					</li>
 					<li>
-						<input type="button" value="列出账户" onclick="dWallet.loadAccounts();" />
+						<input id="loadAccounts" type="button" value="列出账户" />
 					</li>
 					<li>
-						<input type="button" value="导出钱包" onclick="dWallet.exportWallet();" />
+						<input id="importWallet" type="button" value="导入钱包" />
 					</li>
 					<li>
-						<input type="button" value="导入钱包" onclick="dWallet.importWallet(importWalletData);" />
+						<input id="exportWallet" type="button" value="导出钱包" />
+					</li>
+					<li>
+						<input id="setPassword" type="button" value="设置密码" />
+					</li>
+					<li>
+						<input id="lock" type="button" value="锁定" />
+					</li>
+					<li>
+						<input id="unlock" type="button" value="解锁" />
 					</li>
 				</ul>
 			</menu>

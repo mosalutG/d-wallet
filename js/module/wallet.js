@@ -2,7 +2,6 @@
 
 if(localStorage.getItem("accounts") == null) {
 	localStorage.setItem("accounts", "[]");
-	console.log(localStorage.getItem("accounts"));
 }
 
 var [web3, dWallet] = (function($) {
@@ -61,84 +60,120 @@ var [web3, dWallet] = (function($) {
 
 	Network.prototype.connect = async function() {
 		$ = new Web3(new Web3.providers.HttpProvider(this.url));
+		return $;
 	}
 
-	const ethereum = new Network(NAME_ETHEREUM[lang], URL_ETHEREUM, ID_ETHEREUM, SYMBOL_ETHEREUM, BROWSER_ETHEREUM);
-	const ropsten = new Network(NAME_ROPSTEN[lang], URL_ROPSTEN, ID_ROPSTEN, SYMBOL_ROPSTEN, BROWSER_ROPSTEN);
-	const rinkeby = new Network(NAME_RINKEBY[lang], URL_RINKEBY, ID_RINKEBY, SYMBOL_RINKEBY, BROWSER_RINKEBY);
-	const localhost = new Network(NAME_LOCALHOST, URL_LOCALHOST, ID_LOCALHOST, SYMBOL_LOCALHOST, "");
-	const bsc = new Network(NAME_BSC[lang], URL_BSC, ID_BSC, SYMBOL_BSC, BROWSER_BSC);
-	const bscTestNet = new Network(NAME_BSC_TESTNET[lang], URL_BSC_TESTNET, ID_BSC_TESTNET, SYMBOL_BSC_TESTNET, BROWSER_BSC_TESTNET);
+	const $$ = function() {
+	}
 
-	var network = ethereum;
-	network.connect();
+	const Response = function(success, msg, data) {
+		this.success = success;
+		this.msg = msg;
+		this.data = data;
+	}
 
-	const $$ = function() {}
+	$$.ethereum = new Network(NAME_ETHEREUM[lang], URL_ETHEREUM, ID_ETHEREUM, SYMBOL_ETHEREUM, BROWSER_ETHEREUM);
+	$$.ropsten = new Network(NAME_ROPSTEN[lang], URL_ROPSTEN, ID_ROPSTEN, SYMBOL_ROPSTEN, BROWSER_ROPSTEN);
+	$$.rinkeby = new Network(NAME_RINKEBY[lang], URL_RINKEBY, ID_RINKEBY, SYMBOL_RINKEBY, BROWSER_RINKEBY);
+	$$.localhost = new Network(NAME_LOCALHOST, URL_LOCALHOST, ID_LOCALHOST, SYMBOL_LOCALHOST, "");
+	$$.bsc = new Network(NAME_BSC[lang], URL_BSC, ID_BSC, SYMBOL_BSC, BROWSER_BSC);
+	$$.bscTestNet = new Network(NAME_BSC_TESTNET[lang], URL_BSC_TESTNET, ID_BSC_TESTNET, SYMBOL_BSC_TESTNET, BROWSER_BSC_TESTNET);
+
+	$$.ethereum.connect();
 
 	/* checkout chain */
 	$$.checkout = async function(n) {
-		network = n;
-		await network.connect();
-		$.eth.getChainId().then(console.log);
+		if(!$$.unlocked) return new Response(false, "Permission denied");
+		let c = await n.connect();
 
-		return network;
+		return new Response(true, "ok", $);
 	}
 
 	/* create an account */
-	$$.createAccount = function(name, fn) {
+	$$.createAccount = function(name) {
+		if(!$$.unlocked) return new Response(false, "Permission denied");
 		let account = $.eth.accounts.create();
 		var accounts = JSON.parse(localStorage.getItem("accounts"));
 		for(let i = 0; i < accounts.length; i++) {
 			if(accounts[i].privKey == account.privateKey) {
-				return;
+				return new Response(false, "This account has already existed");
 			}
 		}
 		accounts.push({address: account.address, name: name, privKey: account.privateKey});
 		localStorage.setItem("accounts", JSON.stringify(accounts));
-		fn(account);
+		return new Response(true, "ok", account);
 	}
 
-	$$.importAccount = function(name, privKey, fn) {
+	$$.importAccount = function(name, privKey) {
+		if(!$$.unlocked) return new Response(false, "Permission denied");
 		var accounts = JSON.parse(localStorage.getItem("accounts"));
 		for(let i = 0; i < accounts.length; i++) {
 			if(accounts[i].privKey == privKey) {
-				return;
+				return new Response(false, "This account has already existed");
 			}
 		}
 		let account = $.eth.accounts.privateKeyToAccount(privKey);
 		accounts.push({address: account.address, name: name, privKey: account.privateKey});
 		localStorage.setItem("accounts", JSON.stringify(accounts));
-		fn(account);
+		return new Response(true, "ok", account);
 	}
 
-	$$.exportAccount = function(address, fn) {
+	$$.exportAccount = function(address) {
+		if(!$$.unlocked) return new Response(false, "Permission denied");
 		var accounts = JSON.parse(localStorage.getItem("accounts"));
 		for(let i = 0; i < accounts.length; i++) {
 			if(accounts[i].address == address) {
-				fn(accounts[i].privKey);
-				return accounts[i].privKey;
+				return new Response(true, "ok", accounts[i].privKey);
 			}
 		}
 	}
 
 	$$.removeAccount = function(index) {
+		if(!$$.unlocked) return new Response(false, "Permission denied");
 		var accounts = JSON.parse(localStorage.getItem("accounts"));
 		accounts[index] = accounts[accounts.length - 1];
 		accounts.pop();
 		localStorage.setItem("accounts", JSON.stringify(accounts));
+		return new Response(true, "ok");
 	}
 
 	$$.loadAccounts = async function() {
-		console.log(JSON.parse(localStorage.getItem("accounts")));
-		return JSON.parse(localStorage.getItem("accounts"));
+		if(!$$.unlocked) return new Response(false, "Permission denied");
+		return new Response(true, "ok", JSON.parse(localStorage.getItem("accounts")));
 	}
 
 	$$.importWallet = function(accounts) {
+		if(!$$.unlocked) return new Response(false, "Permission denied");
 		localStorage.setItem("accounts", accounts);
+		return new Response(true, "ok");
 	}
 
 	$$.exportWallet = function() {
+		if(!$$.unlocked) return new Response(false, "Permission denied");
 		navigator.clipboard.writeText(localStorage.getItem("accounts"));
+		return new Response(true, "ok", localStorage.getItem("accounts"));
+	}
+
+	$$.unlocked = false;
+
+	$$.setPassword = function(password) {
+		if(localStorage.getItem("password") != null) {
+			if(!$$.unlocked) return new Response(false, "Permission denied");
+		}
+		localStorage.setItem("password", MD5(password) + "");
+		return new Response(true, "ok");
+	}
+
+	$$.unlock = function(password) {
+		if(MD5(password) != localStorage.getItem("password")) return Response(false, "Permission denied");
+		$$.unlocked = true;
+		return new Response(true, "ok");
+	}
+
+	$$.lock = function() {
+		if(!$$.unlocked) return new Response(false, "Permission denied");
+		$$.unlocked = false;
+		return new Response(true, "ok");
 	}
 
 	return [$, $$];
