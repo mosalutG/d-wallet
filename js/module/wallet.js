@@ -1,6 +1,11 @@
 "use strict";
 
-var web3 = (function($) {
+if(localStorage.getItem("accounts") == null) {
+	localStorage.setItem("accounts", "[]");
+	console.log(localStorage.getItem("accounts"));
+}
+
+var [web3, dWallet] = (function($) {
 	const EN = 0;
 	const ZH = 1;
 	var lang = ZH;
@@ -68,8 +73,10 @@ var web3 = (function($) {
 	var network = ethereum;
 	network.connect();
 
+	const $$ = function() {}
+
 	/* checkout chain */
-	$.checkout = async function(n) {
+	$$.checkout = async function(n) {
 		network = n;
 		await network.connect();
 		$.eth.getChainId().then(console.log);
@@ -78,25 +85,61 @@ var web3 = (function($) {
 	}
 
 	/* create an account */
-	$.createAccount = async function(callback) {
+	$$.createAccount = function(name, fn) {
 		let account = $.eth.accounts.create();
-		let accounts = localStorage.getItem("accounts");
-		if(accounts == null) {
-			accounts = "";
+		var accounts = JSON.parse(localStorage.getItem("accounts"));
+		for(let i = 0; i < accounts.length; i++) {
+			if(accounts[i].privKey == account.privateKey) {
+				return;
+			}
 		}
-		accounts += account.address + ":" + account.privateKey + "\n";
+		accounts.push({address: account.address, name: name, privKey: account.privateKey});
+		localStorage.setItem("accounts", JSON.stringify(accounts));
+		fn(account);
+	}
+
+	$$.importAccount = function(name, privKey, fn) {
+		var accounts = JSON.parse(localStorage.getItem("accounts"));
+		for(let i = 0; i < accounts.length; i++) {
+			if(accounts[i].privKey == privKey) {
+				return;
+			}
+		}
+		let account = $.eth.accounts.privateKeyToAccount(privKey);
+		accounts.push({address: account.address, name: name, privKey: account.privateKey});
+		localStorage.setItem("accounts", JSON.stringify(accounts));
+		fn(account);
+	}
+
+	$$.exportAccount = function(address, fn) {
+		var accounts = JSON.parse(localStorage.getItem("accounts"));
+		for(let i = 0; i < accounts.length; i++) {
+			if(accounts[i].address == address) {
+				fn(accounts[i].privKey);
+				return accounts[i].privKey;
+			}
+		}
+	}
+
+	$$.removeAccount = function(index) {
+		var accounts = JSON.parse(localStorage.getItem("accounts"));
+		accounts[index] = accounts[accounts.length - 1];
+		accounts.pop();
+		localStorage.setItem("accounts", JSON.stringify(accounts));
+	}
+
+	$$.loadAccounts = async function() {
+		console.log(JSON.parse(localStorage.getItem("accounts")));
+		return JSON.parse(localStorage.getItem("accounts"));
+	}
+
+	$$.importWallet = function(accounts) {
 		localStorage.setItem("accounts", accounts);
-		callback(account);
 	}
 
-	$.loadAccounts = async function() {
-		console.log(localStorage.getItem("accounts"));
-		return localStorage.getItem("accounts");
-	}
-
-	$.backupWallet = function() {
+	$$.exportWallet = function() {
 		navigator.clipboard.writeText(localStorage.getItem("accounts"));
 	}
 
-	return $;
+	return [$, $$];
 })();
