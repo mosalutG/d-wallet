@@ -2,6 +2,8 @@
 
 <html>
 	<head>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="css/d-wallet.css" />
 		<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
 		<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/md5@2.3.0/dist/md5.min.js"></script>
 		<script type="text/javascript" src="js/module/wallet.js"></script>
@@ -51,6 +53,12 @@
 						<input id="loadAccounts" type="button" value="列出账户" />
 					</li>
 					<li>
+						<input id="checkoutAccount" type="button" value="切换账户" />
+					</li>
+					<li>
+						<input id="loadAccount" type="button" value="当前所用账户" />
+					</li>
+					<li>
 						<input id="importWallet" type="button" value="导入钱包" />
 					</li>
 					<li>
@@ -64,6 +72,23 @@
 					</li>
 					<li>
 						<input id="unlock" type="button" value="解锁" />
+					</li>
+				</ul>
+			</menu>
+			<menu>
+				<h4>ERC20 代币</h4>
+				<ul>
+					<li>
+						<input id="importERC20" type="button" value="导入 ERC-20 代币" />
+					</li>
+					<li>
+						<input id="removeERC20" type="button" value="移除 ERC-20 代币" />
+					</li>
+					<li>
+						<input id="loadERC20s" type="button" value="列出 ERC-20 代币" />
+					</li>
+					<li>
+						<input id="transferERC20" type="button" value="ERC-20 转账" />
 					</li>
 				</ul>
 			</menu>
