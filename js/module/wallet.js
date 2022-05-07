@@ -184,7 +184,6 @@ var [web3, dWallet] = (function($) {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
 
 		const code = await new web3.eth.getCode(address);
-	//	console.log(code);
 		if(code == "0x") {
 			return;
 		}
@@ -231,9 +230,17 @@ var [web3, dWallet] = (function($) {
 
 	$$.transferERC20 = async function(erc20Index, to, value) {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
-		const erc20s = JSON.parse(localStorage.getItem("erc20"));
-		const erc20C = new web3.eth.Contract(erc20abi, erc20s[erc20Index].address);
-		const response = await erc20C.methods.transfer(to, web3.utils.toWei(value)).send({from: $.eth.Contract.defaultAccount.address, gas: 21656 * 10});
+		let erc20s = JSON.parse(localStorage.getItem("erc20"));
+		let erc20C = new web3.eth.Contract(erc20abi, erc20s[erc20Index].address);
+		let gas = await erc20C.methods.transfer(to, $.utils.toWei(value)).estimateGas({
+			from: $.eth.Contract.defaultAccount.address
+		});
+		let response;
+		try {
+			response = await erc20C.methods.transfer(to, web3.utils.toWei(value)).send({from: $.eth.Contract.defaultAccount.address, gas: gas});
+		} catch(error) {
+			return new Response(false, error);
+		}
 		return new Response(true, "ok", response);
 	}
 
