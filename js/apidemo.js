@@ -13,8 +13,6 @@ onload = main;
 
 init();
 
-
-var $walletView;
 /*
  * @mosalut
  * 切换网络
@@ -349,14 +347,15 @@ function transferERC20(index, to, value) {
 	}
 }
 
+function transfer(account, erc20, value) {
+}
+
 async function main() {
 	/*
 	 * @mosalut
 	 * 模拟用户调用网络切换
 	 */
 	checkoutNetworks();
-
-	viewInteractive();
 
 	/*
 	 * @mosalut
@@ -383,50 +382,4 @@ async function main() {
 	removeERC20(0);
 	loadERC20s();
 	transferERC20(0, "0x25a28cd2368B74C4BdD6c058BE1598614DcF21a7", "1");
-}
-
-function viewInteractive() {
-	$walletView = document.getElementById("wallet");
-	let bars = document.querySelectorAll("#wallet>#bar li"); 
-	barToggle(bars);
-
-	let tabs = document.querySelectorAll("#wallet>#content>nav>h4");
-	let menus = document.querySelectorAll("#wallet>#content>#menu>menu");
-	menuToggle(tabs, menus);
-}
-
-function barToggle(bars) {
-	bars[0].onclick = function() {
-		$walletView.style.right = "0px";
-		this.classList.remove("displayBlock");
-		this.classList.add("displayNone");
-		bars[1].classList.remove("displayNone");
-		bars[1].classList.add("displayBlock");
-	}
-
-	bars[1].onclick = function() {
-		$walletView.style.right = "-268px";
-		this.classList.remove("displayBlock");
-		this.classList.add("displayNone");
-		bars[0].classList.remove("displayNone");
-		bars[0].classList.add("displayBlock");
-	}
-}
-
-function menuToggle(tabs, menus) {
-	for(let i = 0; i < tabs.length; i++) {
-		let that = menus[i];
-		tabs[i].onclick = function() {
-			for(let j = 0; j < tabs.length; j++) {
-				tabs[j].classList.remove("current_tab");
-				tabs[j].classList.add("other_tab");
-				menus[j].classList.remove("displayBlock");
-				menus[j].classList.add("displayNone");
-			}
-			this.classList.remove("other_tab");
-			this.classList.add("current_tab");
-			that.classList.remove("displayNone");
-			that.classList.add("displayBlock");
-		}
-	}
 }

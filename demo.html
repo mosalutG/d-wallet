@@ -3,95 +3,63 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<link rel="stylesheet" type="text/css" href="css/d-wallet.css" />
 		<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
 		<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/md5@2.3.0/dist/md5.min.js"></script>
 		<script type="text/javascript" src="js/module/wallet.js"></script>
 		<script type="text/javascript" src="js/demo.js"></script>
+		<link rel="stylesheet" type="text/css" href="css/d-wallet.css" />
 	</head>
 	<body>
 		<aside id="wallet">
-			<menu>
-				<h4>网络设置</h4>
+			<div id="bar">
 				<ul>
-					<li>
-						<input class="checkout" data-chain="0" type="button" value="以太坊 Ethereum 主网络" />
-					</li>
-					<li>
-						<input class="checkout" data-chain="1" type="button" value="Ropsten 测试网络" />
-					</li>
-					<li>
-						<input class="checkout" data-chain="2" type="button" value="Rinkeby 测试网络" />
-					</li>
-					<li>
-						<input class="checkout" data-chain="3" type="button" value="Localhost 8545" />
-					</li>
-					<li>
-						<input class="checkout" data-chain="4" type="button" value="BSC 主网络" />
-					</li>
-					<li>
-						<input class="checkout" data-chain="5" type="button" value="BSC 测试网络" />
-					</li>
+					<li class="displayBlock">wallet menu</li>
+					<li class="displayNone">hide the menu</li>
 				</ul>
-			</menu>
-			<menu>
-				<h4>账户设置</h4>
-				<ul>
-					<li>
-						<input id="createAccount" type="button" value="创建账户" />
-					</li>
-					<li>
-						<input id="importAccount" type="button" value="导入账户" />
-					</li>
-					<li>
-						<input id="exportAccount" type="button" value="导出账户" />
-					</li>
-					<li>
-						<input id="removeAccount" type="button" value="移除账户" />
-					</li>
-					<li>
-						<input id="loadAccounts" type="button" value="列出账户" />
-					</li>
-					<li>
-						<input id="checkoutAccount" type="button" value="切换账户" />
-					</li>
-					<li>
-						<input id="loadAccount" type="button" value="当前所用账户" />
-					</li>
-					<li>
-						<input id="importWallet" type="button" value="导入钱包" />
-					</li>
-					<li>
-						<input id="exportWallet" type="button" value="导出钱包" />
-					</li>
-					<li>
-						<input id="setPassword" type="button" value="设置密码" />
-					</li>
-					<li>
-						<input id="lock" type="button" value="锁定" />
-					</li>
-					<li>
-						<input id="unlock" type="button" value="解锁" />
-					</li>
-				</ul>
-			</menu>
-			<menu>
-				<h4>ERC20 代币</h4>
-				<ul>
-					<li>
-						<input id="importERC20" type="button" value="导入 ERC-20 代币" />
-					</li>
-					<li>
-						<input id="removeERC20" type="button" value="移除 ERC-20 代币" />
-					</li>
-					<li>
-						<input id="loadERC20s" type="button" value="列出 ERC-20 代币" />
-					</li>
-					<li>
-						<input id="transferERC20" type="button" value="ERC-20 转账" />
-					</li>
-				</ul>
-			</menu>
+			</div>
+			<div id="content">
+				<nav>
+					<h4 class="current_tab">网络设置</h4>
+					<h4 class="other_tab">账户设置</h4>
+					<h4 class="other_tab">ERC20 代币</h4>
+				</nav>
+				<div id="menu">
+					<menu class="displayBlock">
+						<ul>
+							<li class=".checkout" data-chain="0">以太坊 Ethereum 主网络</li>
+							<li class=".checkout" data-chain="1">Ropsten 测试网络</li>
+							<li class=".checkout" data-chain="2">Rinkeby 测试网络</li>
+							<li class=".checkout" data-chain="3">Localhost 8545</li> 
+							<li class=".checkout" data-chain="4">BSC 主网络</li>
+							<li class=".checkout" data-chain="5">BSC 测试网络</li>
+						</ul>
+					</menu>
+					<menu class="displayNone">
+						<ul>
+							<li id="createAccount">创建账户</li>
+							<li id="importAccount">导入账户</li>
+							<li id="exportAccount">导出账户</li>
+							<li id="removeAccount">移除账户</li>
+							<li id="loadAccounts">列出账户</li>
+							<li id="checkoutAccount">切换账户</li>
+							<li id="loadAccount">当前所用账户</li>
+							<li id="importWallet">导入钱包</li>
+							<li id="exportWallet">导出钱包</li>
+							<li id="setPassword">设置密码</li>
+							<li id="lock">锁定</li>
+							<li id="unlock">解锁</li>
+						</ul>
+					</menu>
+					<menu class="displayNone">
+						<ul>
+							<li id="importERC20">导入 ERC-20 代币</li>
+							<li id="removeERC20">移除 ERC-20 代币</li>
+							<li id="loadERC20s">列出 ERC-20 代币</li>
+							<li id="transferERC20">ERC-20 转账</li>
+						</ul>
+					</menu>
+				</div>
+			</div>
 		</aside>
 	</body>
 </html>

@@ -1,17 +1,88 @@
 #wallet {
+	position: fixed;
+	right:-268px;
 	display: flex;
 	justify-content: center;
 }
 
-#wallet>menu>ul {
-	list-style: none;
-	border: 1px solid #000000;
-	border-radius: 5px;
-	padding-top: 10px;
-	padding-right: 5px;
-	padding-bottom: 5px;
+#wallet li {
+	cursor: pointer;
 }
 
-#wallet>menu>ul>li {
+#wallet>#bar>ul {
+	list-style: none;
+	color: #fa7600;
+}
+
+#wallet>#bar>ul>li {
+	margin-top: 15px;
+	padding-top: 2px;
+	padding-left: 5px;
+	padding-bottom: 2px;
+	border-top-left-radius: 30%;
+	border-bottom-left-radius: 30%;
+	background-color: #0039a4;
+}
+
+#wallet>#content {
+	border: solid 1px #0039a4;
+}
+
+#wallet>#content>nav {
+	display: flex;
+	justify-content: space-around;
+	background-color: #0039a4;
+}
+
+#wallet>#content>nav>h4 {
+	margin-bottom: 0px;
+	cursor: pointer;
+	padding-right: 10px;
+	padding-left: 10px;
+}
+
+#wallet>#content>#menu {
+	display: flex;
+	justify-content: center;
+	color: #eeeeee;
+}
+
+#wallet>#content>#menu>menu {
+	padding-inline-start: 0px;
+	margin-block-start: 0em;
+	margin-block-end: 0em;
+}
+
+#wallet>#content>#menu>menu>ul {
+	list-style: none;
+}
+
+#wallet>#content>#menu>menu>ul>li {
+	margin-bottom: 5px;
+	padding-top: 5px;
+	padding-right: 10px;
 	padding-bottom: 5px;
+	padding-left: 10px;
+	background-color: #007700;
+	border-radius: 5px;
+	text-align: center;
+	box-shadow: -2px 2px teal;
+}
+
+#wallet .displayBlock {
+	display: block;
+}
+
+#wallet .displayNone {
+	display: none;
+}
+
+#wallet .current_tab {
+	color: #ffffff;
+	background-color: transparent;
+}
+
+#wallet .other_tab {
+	color: #aaaaaa;
+	background-color: transparent;
 }
