@@ -31,6 +31,11 @@ function viewInteractive() {
 	let passwordInput = document.querySelector("#wallet #input #password");
 	let retryInput = document.querySelector("#wallet #input #retry");
 	let addressCInput = document.querySelector("#wallet #input #addressC");
+	let nameInput = document.querySelector("#wallet #input #name");
+	let symbolInput = document.querySelector("#wallet #input #symbol");
+	let decimalsInput = document.querySelector("#wallet #input #decimals");
+	let totalSupplyInput = document.querySelector("#wallet #input #totalSupply");
+	let amountInput = document.querySelector("#wallet #input #amount");
 
 	$inputs.push(accountNameInput);
 	$inputs.push(privKeyInput);
@@ -39,6 +44,11 @@ function viewInteractive() {
 	$inputs.push(passwordInput);
 	$inputs.push(retryInput);
 	$inputs.push(addressCInput);
+	$inputs.push(nameInput);
+	$inputs.push(symbolInput);
+	$inputs.push(decimalsInput);
+	$inputs.push(totalSupplyInput);
+	$inputs.push(amountInput);
 
 	$cancel.onclick = cancelInput;
 
@@ -63,10 +73,10 @@ function viewInteractive() {
 	setPassword(passwordInput, retryInput);
 	lock();
 	unlock(passwordInput);
-	importERC20("0xa70D1396F8CCCCB62406c7498f5eD1BB974F513F");
-	removeERC20(0);
+	importERC20(addressCInput, nameInput, symbolInput, decimalsInput, totalSupplyInput);
+	removeERC20(addressCInput);
 	loadERC20s();
-	transferERC20(0, "0x25a28cd2368B74C4BdD6c058BE1598614DcF21a7", "1");
+	transferERC20(addressCInput, addressAInput, amountInput);
 }
 
 function barToggle(bars) {

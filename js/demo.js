@@ -95,7 +95,7 @@ function createAccount(accountNameInput) {
 	let dom = document.querySelector("#wallet #createAccount");
 	dom.onclick = function() {
 		inputsToggle([accountNameInput]);
-		addressAInput.focus();
+		addressNameInput.focus();
 
 		accountNameInput.oninput = function() {
 			if(this.value == "") {
@@ -448,16 +448,35 @@ function unlock(passwordInput) {
  * @mosalut
  * 导入代币
  */
-function importERC20(address) {
+function importERC20(addressCInput, nameInput, symbolInput, decimalsInput, totalSupplyInput) {
 	let dom = document.querySelector("#wallet #importERC20");
-	dom.onclick = async function() {
-		let response = await dWallet.importERC20(address);
-		console.log(response);
-		if(!response.success) {
-			console.error(response.msg);
-			return;
+	dom.onclick = function() {
+		inputsToggle([addressCInput, nameInput, symbolInput, decimalsInput, totalSupplyInput]);
+		addressCInput.focus();
+
+		addressCInput.oninput = function() {
+			if(this.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
 		}
-		console.log(response.data);
+
+		$submit.onclick = async function() {
+			let response = await dWallet.importERC20(addressCInput.value);
+			console.log(response);
+			if(!response.success) {
+				console.error(response.msg);
+				$output.innerText = response.msg;
+				return;
+			}
+			console.log(response.data);
+			nameInput.value = response.data.name;
+			symbolInput.value = response.data.symbol;
+			decimalsInput.value = response.data.decimals;
+			totalSupplyInput.value = response.data.totalSupply;
+			$output.innerText = response.msg;
+		}
 	}
 }
 
@@ -465,15 +484,29 @@ function importERC20(address) {
  * @mosalut
  * 移除代币
  */
-function removeERC20(index) {
+function removeERC20(addressCInput) {
 	let dom = document.querySelector("#wallet #removeERC20");
 	dom.onclick = function() {
-		let response = dWallet.removeERC20(index);
-		if(!response.success) {
-			console.error(response.msg);
-			return;
+		inputsToggle([addressCInput]);
+		addressCInput.focus();
+
+		addressCInput.oninput = function() {
+			if(this.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
 		}
-		console.log(response.data);
+
+		$submit.onclick = function() {
+			let response = dWallet.removeERC20(addressCInput.value);
+			if(!response.success) {
+				console.error(response.msg);
+				$output.innerText = response.msg;
+				return;
+			}
+			$output.innerText = response.msg;
+		}
 	}
 }
 
@@ -484,12 +517,24 @@ function removeERC20(index) {
 function loadERC20s() {
 	let dom = document.querySelector("#wallet #loadERC20s");
 	dom.onclick = function() {
+		inputsToggle([]);
+
 		let response = dWallet.loadERC20s();
 		if(!response.success) {
 			console.error(response.msg);
 			return;
 		}
-		console.log(response.data);
+
+		if(response.data.length == 0) {
+			$output.innerText = "暂无ERC-20";
+		}
+
+		let ul = "<ul style='list-style:none; text-align:left'>";
+		for(let i = 0; i < response.data.length; i++) {
+			ul += "<hr /><li>地址:" + response.data[i].address + "</li><li>名称:" + response.data[i].name + "</li><li>符号:" + response.data[i].symbol + "</li><li>小数长度:" + response.data[i].decimals + "</li><li>总供应量:" + response.data[i].totalSupply + "</li>";
+		}
+		ul += "</ul>";
+		$output.innerHTML = ul;
 	}
 }
 
@@ -497,16 +542,48 @@ function loadERC20s() {
  * @mosalut
  * 转账
  */
-function transferERC20(index, to, value) {
+function transferERC20(addressCInput, addressAInput, amountInput) {
 	let dom = document.querySelector("#wallet #transferERC20");
 	dom.onclick = async function() {
-		let response = await dWallet.transferERC20(index, to, value);
-		console.log(response);
-		if(!response.success) {
-			console.error(response.msg);
-			return;
+		inputsToggle([addressCInput, addressAInput, amountInput]);
+		addressCInput.focus();
+
+		addressCInput.oninput = function() {
+			if(this.value == "" || addressAInput.value == "" || amountInput.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
 		}
-		console.log(response.data);
+
+		addressAInput.oninput = function() {
+			if(this.value == "" || addressCInput.value == "" || amountInput.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
+		}
+
+		amountInput.oninput = function() {
+			if(this.value == "" || addressCInput.value == "" || addressAInput.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
+		}
+
+		$submit.onclick = async function() {
+			let response = await dWallet.transferERC20(addressCInput.value, addressAInput.value, amountInput.value);
+			if(!response.success) {
+				console.error(response.msg);
+				$output.innerText = response.msg;
+				return;
+			}
+			console.log(response.data);
+			$output.innerHTML += "<div>block hash: " + response.data.blockHash + "</div>";
+			$output.innerHTML += "<div>block number: " + response.data.blockNumber + "</div>";
+			$output.innerHTML += "<div>transaction hash: " + response.data.transactionHash + "</div>";
+		}
 	}
 }
 
