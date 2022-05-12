@@ -87,6 +87,7 @@ var [web3, dWallet] = (function($) {
 	$$.createAccount = function(name) {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
 		let account = $.eth.accounts.create();
+		account.name = name;
 		$.eth.accounts.wallet.add(account);
 		$.eth.accounts.wallet.save("");
 		return new Response(true, "ok", account);
@@ -94,25 +95,28 @@ var [web3, dWallet] = (function($) {
 
 	$$.importAccount = function(name, privKey) {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
-		let account = $.eth.accounts.privateKeyToAccount(privKey);
+		let account;
+		try {
+			accounts = $.eth.accounts.privateKeyToAccount(privKey);
+		} catch(e) {
+			return new Response(false, e);
+		}
+		account.name = name;
 		$.eth.accounts.wallet.add(account);
 		$.eth.accounts.wallet.save("");
 		return new Response(true, "ok", account);
 	}
 
-	$$.exportAccount = function(address) {
+	$$.exportAccount = function(index) {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
 		let accounts = $.eth.accounts.wallet;
-		for(let i = 0; i < accounts.length; i++) {
-			if(accounts[i].address == address) {
-				return new Response(true, "ok", accounts[i].privateKey);
-			}
-		}
+
+		return new Response(true, "ok", accounts[i].privateKey);
 
 		return new Response(false, "Invalid address or none of this address");
 	}
 
-	$$.removeAccount = function(address) {
+	$$.removeAccount = function(index) {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
 		$.eth.accounts.wallet.remove(address);
 		$.eth.accounts.wallet.save("");
@@ -124,14 +128,18 @@ var [web3, dWallet] = (function($) {
 		return new Response(true, "ok", $.eth.accounts.wallet);
 	}
 
-	$$.checkoutAccount = function(index) {
+	$$.checkoutAccount = function(address) {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
-		if(index >= $.eth.accounts.wallet.length) return new Response(false, "Index of wallet accounts out of bounds");
-		$.eth.Contract.defaultAccount = $.eth.accounts.wallet[index];
-		return new Response(true, "ok");
+		for(let i = 0; i < $.eth.accounts.wallet.length; i++) {
+			if($.eth.accounts.wallet[i].address == address) {
+				$.eth.Contract.defaultAccount = $.eth.accounts.wallet[i];
+				return new Response(true, "ok");
+			}
+		}
+		return new Response(false, "No account matching");
 	}
 
-	$$.loadAccount = function(index) {
+	$$.loadAccount = function() {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
 		return new Response(true, "ok", $.eth.Contract.defaultAccount);
 	}

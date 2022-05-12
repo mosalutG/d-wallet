@@ -7,6 +7,7 @@
 		<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/md5@2.3.0/dist/md5.min.js"></script>
 		<script type="text/javascript" src="js/module/wallet.js"></script>
 		<script type="text/javascript" src="js/demo.js"></script>
+		<script type="text/javascript" src="js/view.js"></script>
 		<link rel="stylesheet" type="text/css" href="css/d-wallet.css" />
 	</head>
 	<body>
@@ -26,12 +27,12 @@
 				<div id="menu">
 					<menu class="displayBlock">
 						<ul>
-							<li class=".checkout" data-chain="0">以太坊 Ethereum 主网络</li>
-							<li class=".checkout" data-chain="1">Ropsten 测试网络</li>
-							<li class=".checkout" data-chain="2">Rinkeby 测试网络</li>
-							<li class=".checkout" data-chain="3">Localhost 8545</li> 
-							<li class=".checkout" data-chain="4">BSC 主网络</li>
-							<li class=".checkout" data-chain="5">BSC 测试网络</li>
+							<li class="checkout" data-chain="0">以太坊 Ethereum 主网络</li>
+							<li class="checkout" data-chain="1">Ropsten 测试网络</li>
+							<li class="checkout" data-chain="2">Rinkeby 测试网络</li>
+							<li class="checkout" data-chain="3">Localhost 8545</li> 
+							<li class="checkout" data-chain="4">BSC 主网络</li>
+							<li class="checkout" data-chain="5">BSC 测试网络</li>
 						</ul>
 					</menu>
 					<menu class="displayNone">
@@ -60,6 +61,20 @@
 					</menu>
 				</div>
 			</div>
+			<div id="input" class="displayNone">
+				<input id="accountName" type="text" placeholder="账户名称" /><br />
+				<input id="privKey" type="text" placeholder="私钥" /><br />
+				<input id="addressA" type="text" placeholder="账户地址" /><br />
+				<textarea id="wallet" placeholder="钱包内容"></textarea>
+				<input id="password" type="password" placeholder="密码" /><br />
+				<input id="retry" type="password" placeholder="确认密码" /><br />
+				<input id="addressC" type="text" placeholder="合约地址" /><br />
+				<br />
+				<input id="submit" type="button" disabled value="确认" />
+				<input id="cancel" type="button" value="返回" />
+				<div id="output"></div>
+			</div>
+			<div id="cover" class="displayNone"></div>
 		</aside>
 	</body>
 </html>
