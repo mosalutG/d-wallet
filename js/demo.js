@@ -5,7 +5,6 @@
 web3.eth.getChainId().then(console.log);
 
 async function init() {
-	web3.eth.getBalance("0x253CCA19F1207627542746B62109CaA543271245").then(console.log);
 	console.log(web3);
 }
 
@@ -18,11 +17,12 @@ init();
  * 切换网络
  */
 function checkoutNetworks() {
-	let doms = document.getElementsByClassName("checkout")
+	let doms = document.querySelectorAll("#wallet .checkout");
 
 	for(let i = 0; i < doms.length; i++) {
-		doms[i].onclick = function() {
-			selectNetwork(this);
+		doms[i].onclick = async function() {
+			await selectNetwork(this);
+			document.querySelector("#wallet>#content>#network>span").innerText = dWallet.currentNetwork.name;
 		}
 	}
 }
@@ -38,7 +38,7 @@ async function selectNetwork(dom) {
 			response = await dWallet.checkout(dWallet.ethereum);
 			if(!response.success) {
 				console.error("selectNetwork:", response.msg)
-				break;
+				return;
 			}
 			web3.eth.getChainId().then(console.log);
 			break;
@@ -46,7 +46,7 @@ async function selectNetwork(dom) {
 			response = await dWallet.checkout(dWallet.ropsten);
 			if(!response.success) {
 				console.error("selectNetwork:", response.msg)
-				break;
+				return;
 			}
 			web3.eth.getChainId().then(console.log);
 			break;
@@ -54,7 +54,7 @@ async function selectNetwork(dom) {
 			response = await dWallet.checkout(dWallet.rinkeby);
 			if(!response.success) {
 				console.error("selectNetwork:", response.msg)
-				break;
+				return;
 			}
 			web3.eth.getChainId().then(console.log);
 			break;
@@ -62,7 +62,7 @@ async function selectNetwork(dom) {
 			response = await dWallet.checkout(dWallet.localhost);
 			if(!response.success) {
 				console.error("selectNetwork:", response.msg)
-				break;
+				return;
 			}
 			web3.eth.getChainId().then(console.log);
 			break;
@@ -70,7 +70,7 @@ async function selectNetwork(dom) {
 			response = await dWallet.checkout(dWallet.bsc);
 			if(!response.success) {
 				console.error("selectNetwork:", response.msg)
-				break;
+				return;
 			}
 			web3.eth.getChainId().then(console.log);
 			break;
@@ -78,13 +78,18 @@ async function selectNetwork(dom) {
 			response = await dWallet.checkout(dWallet.bscTestNet);
 			if(!response.success) {
 				console.error("selectNetwork:", response.msg)
-				break;
+				return;
 			}
 			web3.eth.getChainId().then(console.log);
 			break;
 		default:
 			console.error("selectNetwork: Invalid network");
+			return;
 	}
+	
+	let balance = Web3.utils.fromWei(await web3.eth.getBalance(web3.eth.defaultAccount));
+	let maincoin = document.querySelector("#wallet>#content>#maincoin");
+	maincoin.innerHTML = "余额: " + balance + "<input type='button' value='转账' />";
 }
 
 /*
@@ -112,7 +117,6 @@ function createAccount(accountNameInput) {
 				$output.innerText = response.msg;
 				return;
 			}
-			console.log(response.data);
 			$output.innerText = response.data;
 		}
 	}
@@ -125,19 +129,11 @@ function createAccount(accountNameInput) {
 function importAccount(accountNameInput, privKeyInput) {
 	let dom = document.querySelector("#wallet #importAccount");
 	dom.onclick = function() {
-		inputsToggle([accountNameInput, privKeyInput]);
-		addressAInput.focus();
-
-		accountNameInput.oninput = function() {
-			if(this.value == "" || privKeyInput.value == "") {
-				$submit.disabled = true;
-			} else {
-				$submit.disabled = false;
-			}
-		}
+		inputsToggle([privKeyInput]);
+		privKeyInput.focus();
 
 		privKeyInput.oninput = function() {
-			if(this.value == "" || accountNameInput.value == "") {
+			if(this.value == "") {
 				$submit.disabled = true;
 			} else {
 				$submit.disabled = false;
@@ -145,13 +141,12 @@ function importAccount(accountNameInput, privKeyInput) {
 		}
 
 		$submit.onclick = function() {
-			let response = dWallet.importAccount(accountNameInput.value, privKeyInput.value);
+			let response = dWallet.importAccount(privKeyInput.value);
 			if(!response.success) {
 				console.error(response.msg);
 				$output.innerText = response.msg;
 				return;
 			}
-			console.log(response.data);
 			$output.innerText = "地址:" + response.data.address + "\n" + "私钥:" + response.data.privateKey;
 		}
 	}
@@ -182,7 +177,6 @@ function exportAccount(addressAInput) {
 				$output.innerText = response.msg;
 				return;
 			}
-			console.log(response.data);
 			$output.innerText = "私钥:" + response.data;
 		}
 	}
@@ -213,7 +207,6 @@ function removeAccount(addressAInput) {
 				$output.innerText = response.msg;
 				return;
 			}
-			console.log(response.msg);
 			$output.innerText = response.msg;
 		}
 	}
@@ -244,7 +237,6 @@ function checkoutAccount(addressAInput) {
 				$output.innerText = response.msg;
 				return;
 			}
-			console.log(response.data);
 			$output.innerText = response.msg;
 		}
 	}
@@ -265,15 +257,54 @@ function loadAccounts() {
 			$output.innerText = response.msg;
 			return;
 		}
-		console.log(response.data);
+
 		if(response.data.length == 0) {
 			$output.innerHTML += "钱包中没有账户";
 			return;
 		}
 
+		let ul = document.createElement("ul");
+		ul.style.listStyleType = "none";
 		for(let i = 0; i < response.data.length; i++) {
-			$output.innerHTML += "<div>" + response.data[i].address + "</div>";
+			let inputU = document.createElement("input");
+			inputU.style.backgroundColor = "#0077ff";
+			inputU.style.color = "#ffffff";
+			inputU.setAttribute("type", "button");
+			inputU.style.border = "none";
+			inputU.value = "使用";
+			inputU.style.cursor = "pointer";
+			inputU.onclick = async function() {
+				let res = await dWallet.checkoutAccount(response.data[i].address);
+				if(!res.success) {
+					console.error(res.msg);
+					$output.innerText = res.msg;
+					return;
+				}
+				let balance = Web3.utils.fromWei(await web3.eth.getBalance(web3.eth.defaultAccount));
+				let maincoin = document.querySelector("#wallet>#content>#maincoin");
+				maincoin.innerHTML = "余额: " + balance + "<input type='button' value='转账' />";
+				$output.innerText = res.msg;
+			}
+
+			let inputD = document.createElement("input");
+			inputD.style.backgroundColor = "#0077ff";
+			inputD.style.color = "#ffffff";
+			inputD.setAttribute("type", "button");
+			inputD.style.border = "none";
+			inputD.value = "删除";
+			inputD.style.cursor = "pointer";
+
+			let li = document.createElement("li");
+			li.style.cursor = "none";
+			li.innerText = response.data[i].address;
+			li.style.border = "solid 3px #333333";
+			li.style.borderRadius = "5px";
+
+			li.appendChild(inputU);
+			li.appendChild(inputD);
+			ul.appendChild(li);
 		}
+		$output.appendChild(ul);
 	}
 }
 
@@ -292,12 +323,11 @@ function loadAccount() {
 			$output.innerText = response.msg;
 			return;
 		}
-		console.log(response.data);
 		if(response.data == null) {
 			$output.innerText += "当前没有使用任何账户，请切换";
 			return;
 		}
-		$output.innerText += response.data.address;
+		$output.innerText += response.data;
 	}
 }
 
@@ -326,7 +356,6 @@ function importWallet(walletTextarea) {
 				$output.innerText = response.msg;
 				return;
 			}
-			console.log(response.data);
 			$output.innerText = response.msg;
 		}
 	}
@@ -347,7 +376,6 @@ function exportWallet() {
 			$output.innerText = response.msg;
 			return;
 		}
-		console.log(response.data);
 		if(response.data == '[]') {
 			$output.innerText = "当前钱包中没有账户，没有必要导出";
 			return;
@@ -384,7 +412,6 @@ function setPassword(passwordInput, retryInput) {
 
 		$submit.onclick = function() {
 			let response = dWallet.setPassword(passwordInput.value);
-			console.log(response);
 			if(!response.success) {
 				console.error(response.msg);
 				$output.innerText = response.msg;
@@ -464,13 +491,11 @@ function importERC20(addressCInput, nameInput, symbolInput, decimalsInput, total
 
 		$submit.onclick = async function() {
 			let response = await dWallet.importERC20(addressCInput.value);
-			console.log(response);
 			if(!response.success) {
 				console.error(response.msg);
 				$output.innerText = response.msg;
 				return;
 			}
-			console.log(response.data);
 			nameInput.value = response.data.name;
 			symbolInput.value = response.data.symbol;
 			decimalsInput.value = response.data.decimals;
@@ -593,6 +618,9 @@ async function main() {
 	 * 模拟用户调用网络切换
 	 */
 	checkoutNetworks();
+	console.log("defaultAccount:", web3.eth.defaultAccount);
 
 	viewInteractive();
+
+	web3.eth.getBalance("0x253CCA19F1207627542746B62109CaA543271245").then(console.log);
 }

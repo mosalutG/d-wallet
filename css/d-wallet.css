@@ -70,6 +70,14 @@
 	box-shadow: -2px 2px teal;
 }
 
+#wallet>#content>#network {
+	text-align: center;
+}
+
+#wallet>#content>#maincoin>div {
+	display: block;
+}
+
 #wallet .current_tab {
 	color: #ffffff;
 	background-color: transparent;

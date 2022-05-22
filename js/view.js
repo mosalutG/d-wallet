@@ -10,6 +10,8 @@ var $output;
 const $inputs = [];
 
 function viewInteractive() {
+	document.querySelector("#wallet>#content>#network>span").innerText = dWallet.currentNetwork.name;
+
 	$walletView = document.getElementById("wallet");
 	$submit = document.querySelector("#wallet #input #submit");
 	$cancel = document.querySelector("#wallet #input #cancel");
