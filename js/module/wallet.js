@@ -56,8 +56,7 @@ var [web3, dWallet] = (function($) {
 		this.browser = browser;
 	}
 
-	const $$ = function() {
-	}
+	const $$ = {};
 
 	const Response = function(success, msg, data) {
 		this.success = success;
@@ -75,11 +74,13 @@ var [web3, dWallet] = (function($) {
 	$ = new Web3();
 	$.eth.setProvider($$.ethereum.url);
 	$.eth.accounts.wallet.load("");
+	$$.currentNetwork = $$.ethereum;
 
 	/* checkout chain */
 	$$.checkout = async function(n) {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
 		await web3.eth.setProvider(n.url);
+		$$.currentNetwork = n;
 		return new Response(true, "ok");
 	}
 
@@ -87,29 +88,29 @@ var [web3, dWallet] = (function($) {
 	$$.createAccount = function(name) {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
 		let account = $.eth.accounts.create();
+		account.name = name;
 		$.eth.accounts.wallet.add(account);
 		$.eth.accounts.wallet.save("");
 		return new Response(true, "ok", account);
 	}
 
-	$$.importAccount = function(name, privKey) {
+	$$.importAccount = function(privKey) {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
-		let account = $.eth.accounts.privateKeyToAccount(privKey);
-		$.eth.accounts.wallet.add(account);
-		$.eth.accounts.wallet.save("");
-		return new Response(true, "ok", account);
-	}
-
-	$$.exportAccount = function(address) {
-		if(!$$.unlocked) return new Response(false, "Permission denied");
-		let accounts = $.eth.accounts.wallet;
-		for(let i = 0; i < accounts.length; i++) {
-			if(accounts[i].address == address) {
-				return new Response(true, "ok", accounts[i].privateKey);
-			}
+		let account;
+		try {
+			account = $.eth.accounts.privateKeyToAccount(privKey);
+		} catch(e) {
+			return new Response(false, e);
 		}
 
-		return new Response(false, "Invalid address or none of this address");
+		$.eth.accounts.wallet.add(account);
+		$.eth.accounts.wallet.save("");
+		return new Response(true, "ok", account);
+	}
+
+	$$.exportAccount = function(index) {
+		if(!$$.unlocked) return new Response(false, "Permission denied");
+		return new Response(true, "ok", $.eth.accounts.wallet[index].privateKey);
 	}
 
 	$$.removeAccount = function(address) {
@@ -124,16 +125,20 @@ var [web3, dWallet] = (function($) {
 		return new Response(true, "ok", $.eth.accounts.wallet);
 	}
 
-	$$.checkoutAccount = function(index) {
+	$$.checkoutAccount = function(address) {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
-		if(index >= $.eth.accounts.wallet.length) return new Response(false, "Index of wallet accounts out of bounds");
-		$.eth.Contract.defaultAccount = $.eth.accounts.wallet[index];
-		return new Response(true, "ok");
+		for(let i = 0; i < $.eth.accounts.wallet.length; i++) {
+			if($.eth.accounts.wallet[i].address == address) {
+				$.eth.defaultAccount = address;
+				return new Response(true, "ok");
+			}
+		}
+		return new Response(false, "No account matching");
 	}
 
-	$$.loadAccount = function(index) {
+	$$.loadAccount = function() {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
-		return new Response(true, "ok", $.eth.Contract.defaultAccount);
+		return new Response(true, "ok", $.eth.defaultAccount);
 	}
 
 	$$.importWallet = function(accounts) {
@@ -169,7 +174,7 @@ var [web3, dWallet] = (function($) {
 	}
 
 	$$.unlock = function(password) {
-		if(MD5(password) != localStorage.getItem("password")) return Response(false, "Permission denied");
+		if(MD5(password) != localStorage.getItem("password")) return new Response(false, "Permission denied");
 		$$.unlocked = true;
 		return new Response(true, "ok");
 	}
@@ -183,9 +188,20 @@ var [web3, dWallet] = (function($) {
 	$$.importERC20 = async function(address) {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
 
+		let erc20s = JSON.parse(localStorage.getItem("erc20-" + $$.currentNetwork.name));
+		if(erc20s == null) {
+			erc20s = [];
+		}
+
+		for(let i = 0; i < erc20s.length; i++) {
+			if(erc20s[i].address == address) {
+				return new Response(false, "The address is already there");
+			}
+		}
+
 		const code = await new web3.eth.getCode(address);
 		if(code == "0x") {
-			return;
+			return new Response(false, "The address is not belong to a contract");
 		}
 
 		const erc20C = new web3.eth.Contract(erc20abi, address);
@@ -200,48 +216,61 @@ var [web3, dWallet] = (function($) {
 			erc20C.methods.decimals().call().then(r => {decimals = r}),
 		]).then();
 
-		if(localStorage.getItem("erc20") == null) {
-			localStorage.setItem("erc20", "[]");
+		if(localStorage.getItem("erc20-" + $$.currentNetwork.name) == null) {
+			localStorage.setItem("erc20-" + $$.currentNetwork.name, "[]");
 		}
 
-		let erc20s = JSON.parse(localStorage.getItem("erc20"));
 		erc20s.push({"address": address, "name": name, "symbol": symbol, "totalSupply": totalSupply, "decimals": decimals});
 
-		localStorage.setItem("erc20", JSON.stringify(erc20s));
+		localStorage.setItem("erc20-" + $$.currentNetwork.name, JSON.stringify(erc20s));
 
-		return new Response(true, "ok");
+		return new Response(true, "ok", {name: name, symbol: symbol, totalSupply: totalSupply, decimals: decimals});
 	}
 
-	$$.removeERC20 = function(index) {
+	$$.removeERC20 = function(address) {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
-		let erc20s = JSON.parse(localStorage.getItem("erc20"));
-		erc20s.splice(index, 1);
-		localStorage.setItem("erc20", JSON.stringify(erc20s));
-		return new Response(true, "ok");
+		let erc20s = JSON.parse(localStorage.getItem("erc20-" + $$.currentNetwork.name));
+		for(let i = 0; i < erc20s.length; i++) {
+			if(erc20s[i].address == address) {
+				erc20s.splice(i, 1);
+				localStorage.setItem("erc20-" + $$.currentNetwork.name, JSON.stringify(erc20s));
+				return new Response(true, "ok");
+			}
+		}
+		return new Response(false, "No address matches");
 	}
 
 	$$.loadERC20s = function() {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
-		if(localStorage.getItem("erc20") == null) {
+		if(localStorage.getItem("erc20-" + $$.currentNetwork.name) == null) {
 			return new Response(true, "ok", []);
 		}
-		return new Response(true, "ok", JSON.parse(localStorage.getItem("erc20")));
+		return new Response(true, "ok", JSON.parse(localStorage.getItem("erc20-" + $$.currentNetwork.name)));
 	}
 
-	$$.transferERC20 = async function(erc20Index, to, value) {
+	$$.transferERC20 = async function(addressC, to, value) {
 		if(!$$.unlocked) return new Response(false, "Permission denied");
-		let erc20s = JSON.parse(localStorage.getItem("erc20"));
-		let erc20C = new web3.eth.Contract(erc20abi, erc20s[erc20Index].address);
-		let gas = await erc20C.methods.transfer(to, $.utils.toWei(value)).estimateGas({
-			from: $.eth.Contract.defaultAccount.address
-		});
-		let response;
-		try {
-			response = await erc20C.methods.transfer(to, web3.utils.toWei(value)).send({from: $.eth.Contract.defaultAccount.address, gas: gas});
-		} catch(error) {
-			return new Response(false, error);
+		if($.eth.defaultAccount == null) return new Response(false, "Please checkout to an account");
+		let erc20s = JSON.parse(localStorage.getItem("erc20-" + $$.currentNetwork.name));
+		let erc20C;
+		for(let i = 0; i < erc20s.length; i++) {
+			if(erc20s[i].address == addressC) {
+				erc20C = new web3.eth.Contract(erc20abi, addressC);
+
+				let gas = await erc20C.methods.transfer(to, $.utils.toWei(value)).estimateGas({
+					from: $.eth.defaultAccount
+				});
+
+				let response;
+				try {
+					response = await erc20C.methods.transfer(to, web3.utils.toWei(value)).send({from: $.eth.defaultAccount, gas: gas + 1});
+				} catch(error) {
+					return new Response(false, error);
+				}
+				return new Response(true, "ok", response);
+			}
 		}
-		return new Response(true, "ok", response);
+		return new Response(false, "No contract address matches");
 	}
 
 	return [$, $$];

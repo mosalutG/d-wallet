@@ -1,17 +1,140 @@
 #wallet {
+	position: fixed;
+	right:-268px;
 	display: flex;
 	justify-content: center;
+	z-index: 10;
 }
 
-#wallet>menu>ul {
+#wallet li {
+	cursor: pointer;
+}
+
+#wallet>#bar>ul {
 	list-style: none;
-	border: 1px solid #000000;
-	border-radius: 5px;
-	padding-top: 10px;
-	padding-right: 5px;
-	padding-bottom: 5px;
+	color: #fa7600;
 }
 
-#wallet>menu>ul>li {
+#wallet>#bar>ul>li {
+	margin-top: 15px;
+	padding-top: 2px;
+	padding-left: 5px;
+	padding-bottom: 2px;
+	border-top-left-radius: 30%;
+	border-bottom-left-radius: 30%;
+	background-color: #0039a4;
+}
+
+#wallet>#content {
+	border: solid 1px #0039a4;
+}
+
+#wallet>#content>nav {
+	display: flex;
+	justify-content: space-around;
+	background-color: #0039a4;
+}
+
+#wallet>#content>nav>h4 {
+	margin-bottom: 0px;
+	cursor: pointer;
+	padding-right: 10px;
+	padding-left: 10px;
+}
+
+#wallet>#content>#menu {
+	display: flex;
+	justify-content: center;
+	color: #eeeeee;
+}
+
+#wallet>#content>#menu>menu {
+	padding-inline-start: 0px;
+	margin-block-start: 0em;
+	margin-block-end: 0em;
+}
+
+#wallet>#content>#menu>menu>ul {
+	list-style: none;
+}
+
+#wallet>#content>#menu>menu>ul>li {
+	margin-bottom: 5px;
+	padding-top: 5px;
+	padding-right: 10px;
 	padding-bottom: 5px;
+	padding-left: 10px;
+	background-color: #007700;
+	border-radius: 5px;
+	text-align: center;
+	box-shadow: -2px 2px teal;
+}
+
+#wallet>#content>#network {
+	text-align: center;
+}
+
+#wallet>#content>#maincoin>div {
+	display: block;
+}
+
+#wallet .current_tab {
+	color: #ffffff;
+	background-color: transparent;
+}
+
+#wallet .other_tab {
+	color: #aaaaaa;
+	background-color: transparent;
+}
+
+#wallet #input {
+	position: fixed;
+	margin: 0px auto;
+	top:0px;
+	right: 0;
+	left: 0;
+	z-index: 200;
+	border: 1px solid #0039a4;
+	padding-top: 50px;
+	padding-right: 20px;
+	padding-bottom: 50px;
+	padding-left: 20px;
+	background-color: #ffffff;
+	text-align: center;
+}
+
+#wallet #input>input:not([type="button"]) {
+	width: 500px;
+	outline: none;
+	border-top: none;
+	border-right: none;
+	border-bottom: solid 1px #000000;
+	border-left: none;
+}
+
+#wallet #input>textarea {
+	position: static;
+}
+
+#wallet .displayBlock {
+	display: block;
+}
+
+#wallet .displayInlineBlock {
+	display: inline-block;
+}
+
+#wallet .displayNone {
+	display: none;
+}
+
+#wallet #cover {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	background-color: #111111;
+	position: 199;
 }

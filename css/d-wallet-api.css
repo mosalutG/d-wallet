@@ -1,0 +1,17 @@
+#wallet {
+	display: flex;
+	justify-content: center;
+}
+
+#wallet>menu>ul {
+	list-style: none;
+	border: 1px solid #000000;
+	border-radius: 5px;
+	padding-top: 10px;
+	padding-right: 5px;
+	padding-bottom: 5px;
+}
+
+#wallet>menu>ul>li {
+	padding-bottom: 5px;
+}

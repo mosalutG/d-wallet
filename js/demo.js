@@ -5,7 +5,6 @@
 web3.eth.getChainId().then(console.log);
 
 async function init() {
-	web3.eth.getBalance("0x253CCA19F1207627542746B62109CaA543271245").then(console.log);
 	console.log(web3);
 }
 
@@ -18,11 +17,12 @@ init();
  * 切换网络
  */
 function checkoutNetworks() {
-	let doms = document.getElementsByClassName("checkout")
+	let doms = document.querySelectorAll("#wallet .checkout");
 
 	for(let i = 0; i < doms.length; i++) {
-		doms[i].onclick = function() {
-			selectNetwork(this);
+		doms[i].onclick = async function() {
+			await selectNetwork(this);
+			document.querySelector("#wallet>#content>#network>span").innerText = dWallet.currentNetwork.name;
 		}
 	}
 }
@@ -38,7 +38,7 @@ async function selectNetwork(dom) {
 			response = await dWallet.checkout(dWallet.ethereum);
 			if(!response.success) {
 				console.error("selectNetwork:", response.msg)
-				break;
+				return;
 			}
 			web3.eth.getChainId().then(console.log);
 			break;
@@ -46,7 +46,7 @@ async function selectNetwork(dom) {
 			response = await dWallet.checkout(dWallet.ropsten);
 			if(!response.success) {
 				console.error("selectNetwork:", response.msg)
-				break;
+				return;
 			}
 			web3.eth.getChainId().then(console.log);
 			break;
@@ -54,7 +54,7 @@ async function selectNetwork(dom) {
 			response = await dWallet.checkout(dWallet.rinkeby);
 			if(!response.success) {
 				console.error("selectNetwork:", response.msg)
-				break;
+				return;
 			}
 			web3.eth.getChainId().then(console.log);
 			break;
@@ -62,7 +62,7 @@ async function selectNetwork(dom) {
 			response = await dWallet.checkout(dWallet.localhost);
 			if(!response.success) {
 				console.error("selectNetwork:", response.msg)
-				break;
+				return;
 			}
 			web3.eth.getChainId().then(console.log);
 			break;
@@ -70,7 +70,7 @@ async function selectNetwork(dom) {
 			response = await dWallet.checkout(dWallet.bsc);
 			if(!response.success) {
 				console.error("selectNetwork:", response.msg)
-				break;
+				return;
 			}
 			web3.eth.getChainId().then(console.log);
 			break;
@@ -78,28 +78,47 @@ async function selectNetwork(dom) {
 			response = await dWallet.checkout(dWallet.bscTestNet);
 			if(!response.success) {
 				console.error("selectNetwork:", response.msg)
-				break;
+				return;
 			}
 			web3.eth.getChainId().then(console.log);
 			break;
 		default:
 			console.error("selectNetwork: Invalid network");
+			return;
 	}
+	
+	let balance = Web3.utils.fromWei(await web3.eth.getBalance(web3.eth.defaultAccount));
+	let maincoin = document.querySelector("#wallet>#content>#maincoin");
+	maincoin.innerHTML = "余额: " + balance + "<input type='button' value='转账' />";
 }
 
 /*
  * @mosalut
  * 创建账号
  */
-function createAccount(name) {
-	let dom = document.getElementById("createAccount");
+function createAccount(accountNameInput) {
+	let dom = document.querySelector("#wallet #createAccount");
 	dom.onclick = function() {
-		let response = dWallet.createAccount(name);
-		if(!response.success) {
-			console.error(response.msg);
-			return;
+		inputsToggle([accountNameInput]);
+		addressNameInput.focus();
+
+		accountNameInput.oninput = function() {
+			if(this.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
 		}
-		console.log(response.data);
+
+		$submit.onclick = function() {
+			let response = dWallet.createAccount(accountNameInput.value);
+			if(!response.success) {
+				console.error(response.msg);
+				$output.innerText = response.msg;
+				return;
+			}
+			$output.innerText = response.data;
+		}
 	}
 }
 
@@ -107,15 +126,29 @@ function createAccount(name) {
  * @mosalut
  * 导入账号
  */
-function importAccount(name, privKey) {
-	let dom = document.getElementById("importAccount");
+function importAccount(accountNameInput, privKeyInput) {
+	let dom = document.querySelector("#wallet #importAccount");
 	dom.onclick = function() {
-		let response = dWallet.importAccount(name, privKey);
-		if(!response.success) {
-			console.error(response.msg);
-			return;
+		inputsToggle([privKeyInput]);
+		privKeyInput.focus();
+
+		privKeyInput.oninput = function() {
+			if(this.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
 		}
-		console.log(response.data);
+
+		$submit.onclick = function() {
+			let response = dWallet.importAccount(privKeyInput.value);
+			if(!response.success) {
+				console.error(response.msg);
+				$output.innerText = response.msg;
+				return;
+			}
+			$output.innerText = "地址:" + response.data.address + "\n" + "私钥:" + response.data.privateKey;
+		}
 	}
 }
 
@@ -123,16 +156,29 @@ function importAccount(name, privKey) {
  * @mosalut
  * 导出账号
  */
-function exportAccount(address) {
-	let dom = document.getElementById("exportAccount");
+function exportAccount(addressAInput) {
+	let dom = document.querySelector("#wallet #exportAccount");
 	dom.onclick = function() {
-		let response = dWallet.exportAccount(address);
-		console.log(response);
-		if(!response.success) {
-			console.error(response.msg);
-			return;
+		inputsToggle([addressAInput]);
+		addressAInput.focus();
+
+		addressAInput.oninput = function() {
+			if(this.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
 		}
-		console.log(response.data);
+
+		$submit.onclick = function() {
+			let response = dWallet.exportAccount(addressAInput.value);
+			if(!response.success) {
+				console.error(response.msg);
+				$output.innerText = response.msg;
+				return;
+			}
+			$output.innerText = "私钥:" + response.data;
+		}
 	}
 }
 
@@ -140,15 +186,29 @@ function exportAccount(address) {
  * @mosalut
  * 移除账号
  */
-function removeAccount(index) {
-	let dom = document.getElementById("removeAccount");
+function removeAccount(addressAInput) {
+	let dom = document.querySelector("#wallet #removeAccount");
 	dom.onclick = function() {
-		let response = dWallet.removeAccount(index);
-		if(!response.success) {
-			console.error(response.msg);
-			return;
+		inputsToggle([addressAInput]);
+		addressAInput.focus();
+
+		addressAInput.oninput = function() {
+			if(this.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
 		}
-		console.log(response.data);
+
+		$submit.onclick = function() {
+			let response = dWallet.removeAccount(addressAInput.value);
+			if(!response.success) {
+				console.error(response.msg);
+				$output.innerText = response.msg;
+				return;
+			}
+			$output.innerText = response.msg;
+		}
 	}
 }
 
@@ -156,15 +216,29 @@ function removeAccount(index) {
  * @mosalut
  * 切换账号
  */
-function checkoutAccount(index) {
-	let dom = document.getElementById("checkoutAccount");
-	dom.onclick = async function() {
-		let response = await dWallet.checkoutAccount(index);
-		if(!response.success) {
-			console.error(response.msg);
-			return;
+function checkoutAccount(addressAInput) {
+	let dom = document.querySelector("#wallet #checkoutAccount");
+	dom.onclick = function() {
+		inputsToggle([addressAInput]);
+		addressAInput.focus();
+
+		addressAInput.oninput = function() {
+			if(this.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
 		}
-		console.log(response.data);
+
+		$submit.onclick = async function() {
+			let response = await dWallet.checkoutAccount(addressAInput.value);
+			if(!response.success) {
+				console.error(response.msg);
+				$output.innerText = response.msg;
+				return;
+			}
+			$output.innerText = response.msg;
+		}
 	}
 }
 
@@ -173,14 +247,64 @@ function checkoutAccount(index) {
  * 列出所有账号
  */
 function loadAccounts() {
-	let dom = document.getElementById("loadAccounts");
+	let dom = document.querySelector("#wallet #loadAccounts");
 	dom.onclick = async function() {
+		inputsToggle([]);
+
 		let response = await dWallet.loadAccounts();
 		if(!response.success) {
 			console.error(response.msg);
+			$output.innerText = response.msg;
 			return;
 		}
-		console.log(response.data);
+
+		if(response.data.length == 0) {
+			$output.innerHTML += "钱包中没有账户";
+			return;
+		}
+
+		let ul = document.createElement("ul");
+		ul.style.listStyleType = "none";
+		for(let i = 0; i < response.data.length; i++) {
+			let inputU = document.createElement("input");
+			inputU.style.backgroundColor = "#0077ff";
+			inputU.style.color = "#ffffff";
+			inputU.setAttribute("type", "button");
+			inputU.style.border = "none";
+			inputU.value = "使用";
+			inputU.style.cursor = "pointer";
+			inputU.onclick = async function() {
+				let res = await dWallet.checkoutAccount(response.data[i].address);
+				if(!res.success) {
+					console.error(res.msg);
+					$output.innerText = res.msg;
+					return;
+				}
+				let balance = Web3.utils.fromWei(await web3.eth.getBalance(web3.eth.defaultAccount));
+				let maincoin = document.querySelector("#wallet>#content>#maincoin");
+				maincoin.innerHTML = "余额: " + balance + "<input type='button' value='转账' />";
+				$output.innerText = res.msg;
+			}
+
+			let inputD = document.createElement("input");
+			inputD.style.backgroundColor = "#0077ff";
+			inputD.style.color = "#ffffff";
+			inputD.setAttribute("type", "button");
+			inputD.style.border = "none";
+			inputD.value = "删除";
+			inputD.style.cursor = "pointer";
+
+			let li = document.createElement("li");
+			li.style.cursor = "none";
+			li.innerText = response.data[i].address;
+			li.style.border = "solid 3px #333333";
+			li.style.borderRadius = "5px";
+
+			li.appendChild(inputU);
+			li.appendChild(inputD);
+			ul.appendChild(li);
+		}
+		$output.appendChild(ul);
 	}
 }
 
@@ -189,15 +313,21 @@ function loadAccounts() {
  * 当前所用账号
  */
 function loadAccount() {
-	let dom = document.getElementById("loadAccount");
+	let dom = document.querySelector("#wallet #loadAccount");
 	dom.onclick = async function() {
+		inputsToggle([]);
+
 		let response = await dWallet.loadAccount();
-		console.log(response);
 		if(!response.success) {
 			console.error(response.msg);
+			$output.innerText = response.msg;
 			return;
 		}
-		console.log(response.data);
+		if(response.data == null) {
+			$output.innerText += "当前没有使用任何账户，请切换";
+			return;
+		}
+		$output.innerText += response.data;
 	}
 }
 
@@ -205,15 +335,29 @@ function loadAccount() {
  * @mosalut
  * 导入钱包
  */
-function importWallet(data) {
-	let dom = document.getElementById("importWallet");
+function importWallet(walletTextarea) {
+	let dom = document.querySelector("#wallet #importWallet");
 	dom.onclick = function() {
-		let response = dWallet.importWallet(data);
-		if(!response.success) {
-			console.error(response.msg);
-			return;
+		inputsToggle([walletTextarea]);
+		walletTextarea.focus();
+
+		walletTextarea.oninput = function() {
+			if(this.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
 		}
-		console.log(response.data);
+
+		$submit.onclick = function() {
+			let response = dWallet.importWallet(walletTextarea.value);
+			if(!response.success) {
+				console.error(response.msg);
+				$output.innerText = response.msg;
+				return;
+			}
+			$output.innerText = response.msg;
+		}
 	}
 }
 
@@ -222,14 +366,21 @@ function importWallet(data) {
  * 导出钱包
  */
 function exportWallet() {
-	let dom = document.getElementById("exportWallet");
+	let dom = document.querySelector("#wallet #exportWallet");
 	dom.onclick = function() {
+		inputsToggle([]);
+
 		let response = dWallet.exportWallet();
 		if(!response.success) {
 			console.error(response.msg);
+			$output.innerText = response.msg;
 			return;
 		}
-		console.log(response.data);
+		if(response.data == '[]') {
+			$output.innerText = "当前钱包中没有账户，没有必要导出";
+			return;
+		}
+		$output.innerText = response.data;
 	}
 }
 
@@ -237,15 +388,37 @@ function exportWallet() {
  * @mosalut
  * 设置密码
  */
-function setPassword(password) {
-	let dom = document.getElementById("setPassword");
+function setPassword(passwordInput, retryInput) {
+	let dom = document.querySelector("#wallet #setPassword");
 	dom.onclick = function() {
-		let response = dWallet.setPassword(password);
-		if(!response.success) {
-			console.error(response.msg);
-			return;
+		inputsToggle([passwordInput, retryInput]);
+		passwordInput.focus();
+
+		passwordInput.oninput = function() {
+			if(this.value == "" || retryInput.value != this.value) {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
 		}
-		console.log(response.data);
+
+		retryInput.oninput = function() {
+			if(this.value == "" || passwordInput.value != this.value) {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
+		}
+
+		$submit.onclick = function() {
+			let response = dWallet.setPassword(passwordInput.value);
+			if(!response.success) {
+				console.error(response.msg);
+				$output.innerText = response.msg;
+				return;
+			}
+			$output.innerText = response.msg;
+		}
 	}
 }
 
@@ -254,14 +427,17 @@ function setPassword(password) {
  * 锁定钱包
  */
 function lock() {
-	let dom = document.getElementById("lock");
+	let dom = document.querySelector("#wallet #lock");
 	dom.onclick = function() {
+		inputsToggle([]);
+
 		let response = dWallet.lock();
 		if(!response.success) {
 			console.error(response.msg);
+			$output.innerText = response.msg;
 			return;
 		}
-		console.log(response.data);
+		$output.innerText = response.msg;
 	}
 }
 
@@ -269,15 +445,29 @@ function lock() {
  * @mosalut
  * 解锁钱包
  */
-function unlock(password) {
-	let dom = document.getElementById("unlock");
+function unlock(passwordInput) {
+	let dom = document.querySelector("#wallet #unlock");
 	dom.onclick = function() {
-		let response = dWallet.unlock(password);
-		if(!response.success) {
-			console.error(response.msg);
-			return;
+		inputsToggle([passwordInput]);
+		passwordInput.focus();
+
+		passwordInput.oninput = function() {
+			if(this.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
 		}
-		console.log(response.data);
+
+		$submit.onclick = function() {
+			let response = dWallet.unlock(passwordInput.value);
+			if(!response.success) {
+				console.error(response.msg);
+				$output.innerText = response.msg;
+				return;
+			}
+			$output.innerText = response.msg;
+		}
 	}
 }
 
@@ -285,16 +475,33 @@ function unlock(password) {
  * @mosalut
  * 导入代币
  */
-function importERC20(address) {
-	let dom = document.getElementById("importERC20");
-	dom.onclick = async function() {
-		let response = await dWallet.importERC20(address);
-		console.log(response);
-		if(!response.success) {
-			console.error(response.msg);
-			return;
+function importERC20(addressCInput, nameInput, symbolInput, decimalsInput, totalSupplyInput) {
+	let dom = document.querySelector("#wallet #importERC20");
+	dom.onclick = function() {
+		inputsToggle([addressCInput, nameInput, symbolInput, decimalsInput, totalSupplyInput]);
+		addressCInput.focus();
+
+		addressCInput.oninput = function() {
+			if(this.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
 		}
-		console.log(response.data);
+
+		$submit.onclick = async function() {
+			let response = await dWallet.importERC20(addressCInput.value);
+			if(!response.success) {
+				console.error(response.msg);
+				$output.innerText = response.msg;
+				return;
+			}
+			nameInput.value = response.data.name;
+			symbolInput.value = response.data.symbol;
+			decimalsInput.value = response.data.decimals;
+			totalSupplyInput.value = response.data.totalSupply;
+			$output.innerText = response.msg;
+		}
 	}
 }
 
@@ -302,15 +509,29 @@ function importERC20(address) {
  * @mosalut
  * 移除代币
  */
-function removeERC20(index) {
-	let dom = document.getElementById("removeERC20");
+function removeERC20(addressCInput) {
+	let dom = document.querySelector("#wallet #removeERC20");
 	dom.onclick = function() {
-		let response = dWallet.removeERC20(index);
-		if(!response.success) {
-			console.error(response.msg);
-			return;
+		inputsToggle([addressCInput]);
+		addressCInput.focus();
+
+		addressCInput.oninput = function() {
+			if(this.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
 		}
-		console.log(response.data);
+
+		$submit.onclick = function() {
+			let response = dWallet.removeERC20(addressCInput.value);
+			if(!response.success) {
+				console.error(response.msg);
+				$output.innerText = response.msg;
+				return;
+			}
+			$output.innerText = response.msg;
+		}
 	}
 }
 
@@ -319,14 +540,26 @@ function removeERC20(index) {
  * 列出代币
  */
 function loadERC20s() {
-	let dom = document.getElementById("loadERC20s");
+	let dom = document.querySelector("#wallet #loadERC20s");
 	dom.onclick = function() {
+		inputsToggle([]);
+
 		let response = dWallet.loadERC20s();
 		if(!response.success) {
 			console.error(response.msg);
 			return;
 		}
-		console.log(response.data);
+
+		if(response.data.length == 0) {
+			$output.innerText = "暂无ERC-20";
+		}
+
+		let ul = "<ul style='list-style:none; text-align:left'>";
+		for(let i = 0; i < response.data.length; i++) {
+			ul += "<hr /><li>地址:" + response.data[i].address + "</li><li>名称:" + response.data[i].name + "</li><li>符号:" + response.data[i].symbol + "</li><li>小数长度:" + response.data[i].decimals + "</li><li>总供应量:" + response.data[i].totalSupply + "</li>";
+		}
+		ul += "</ul>";
+		$output.innerHTML = ul;
 	}
 }
 
@@ -334,20 +567,49 @@ function loadERC20s() {
  * @mosalut
  * 转账
  */
-function transferERC20(index, to, value) {
-	let dom = document.getElementById("transferERC20");
+function transferERC20(addressCInput, addressAInput, amountInput) {
+	let dom = document.querySelector("#wallet #transferERC20");
 	dom.onclick = async function() {
-		let response = await dWallet.transferERC20(index, to, value);
-		console.log(response);
-		if(!response.success) {
-			console.error(response.msg);
-			return;
-		}
-		console.log(response.data);
-	}
-}
+		inputsToggle([addressCInput, addressAInput, amountInput]);
+		addressCInput.focus();
 
-function transfer(account, erc20, value) {
+		addressCInput.oninput = function() {
+			if(this.value == "" || addressAInput.value == "" || amountInput.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
+		}
+
+		addressAInput.oninput = function() {
+			if(this.value == "" || addressCInput.value == "" || amountInput.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
+		}
+
+		amountInput.oninput = function() {
+			if(this.value == "" || addressCInput.value == "" || addressAInput.value == "") {
+				$submit.disabled = true;
+			} else {
+				$submit.disabled = false;
+			}
+		}
+
+		$submit.onclick = async function() {
+			let response = await dWallet.transferERC20(addressCInput.value, addressAInput.value, amountInput.value);
+			if(!response.success) {
+				console.error(response.msg);
+				$output.innerText = response.msg;
+				return;
+			}
+			console.log(response.data);
+			$output.innerHTML += "<div>block hash: " + response.data.blockHash + "</div>";
+			$output.innerHTML += "<div>block number: " + response.data.blockNumber + "</div>";
+			$output.innerHTML += "<div>transaction hash: " + response.data.transactionHash + "</div>";
+		}
+	}
 }
 
 async function main() {
@@ -356,30 +618,9 @@ async function main() {
 	 * 模拟用户调用网络切换
 	 */
 	checkoutNetworks();
+	console.log("defaultAccount:", web3.eth.defaultAccount);
 
-	/*
-	 * @mosalut
-	 * 以下方法:
-	 * createAccount, importAccount, exportAccount,
-	 * removeAccount, loadAccounts, importWallet,
-	 * exportWallet, setPassword, lock, unlock
-	 * 模拟用户调用
-	 * 参数为模拟用户输入
-	 */
-	createAccount("demo name");
-	importAccount("HN owner", "0x404cc778fdb355c3c2f8136a28471c809a33155d3781f37bcb6eeb50be3e3c44");
-	exportAccount("0x0e443357C06B75e9EDA5e95D31d8B8f1952A3Cad");
-	removeAccount("0x7442f559efb11b05d8e7187b719a9de7c1f974f5");
-	loadAccounts();
-	loadAccount();
-	checkoutAccount(2);
-	importWallet('[{"address":"0xabD552703D2EFDBc7aD8334405f188cB46E7a8Fc","privateKey":"0x59e5997856aef7925cddf197a261c0fbe3c1e47a42db09e60c00fd4b1157172e"},{"address":"0x25a28cd2368B74C4BdD6c058BE1598614DcF21a7","privateKey":"0xc6c8779b17e2aee1137aae4d3c4fffda9b90289856b1aba58629224061d3d8e5"},{"address":"0x0e443357C06B75e9EDA5e95D31d8B8f1952A3Cad","privateKey":"0x404cc778fdb355c3c2f8136a28471c809a33155d3781f37bcb6eeb50be3e3c44"},{"address":"0x7442F559eFB11B05d8E7187B719A9de7C1f974F5","privateKey":"0x901e83c7c076a0a7c72d0afc5bbd871b03d2d774c7a76fa1f5b0f75827f4438b","index":0},{"address":"0x3FDD5b0F7171506c37107B4669199eb77D80C491","privateKey":"0x90e0ce028e1faf8b858d702e41f85a2ec59b3d818df67f13cdfd25e2c46da860","index":1}]');
-	exportWallet();
-	setPassword('129787x#');
-	lock();
-	unlock('129787x#');
-	importERC20("0xa70D1396F8CCCCB62406c7498f5eD1BB974F513F");
-	removeERC20(0);
-	loadERC20s();
-	transferERC20(0, "0x25a28cd2368B74C4BdD6c058BE1598614DcF21a7", "1");
+	viewInteractive();
+
+	web3.eth.getBalance("0x253CCA19F1207627542746B62109CaA543271245").then(console.log);
 }
